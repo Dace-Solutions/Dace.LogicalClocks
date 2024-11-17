@@ -1,8 +1,7 @@
-using Dace.LogicalClock;
-
 namespace Dace.LogicalClocks.Configurations;
 
 using Dace.LogicalClocks;
+using Dace.LogicalClocks.Lamport;
 using Microsoft.Extensions.DependencyInjection;
 
 public class LogicalClockConfigurator
