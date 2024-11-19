@@ -24,17 +24,19 @@ public class LamportClockTest
     {
         var clock = LamportClock.Create();
         var receivedClock = new LamportClockTimestamp(5);
-        clock.Witness(receivedClock);
+        var result = clock.Witness(receivedClock);
         var currentClock = clock.Current();
         Assert.Equal(6, currentClock.Time);
+        Assert.Equal(result.Time, currentClock.Time);
     }
 
     [Fact]
     public void Tick_ShouldIncrementClock()
     {
         var clock = LamportClock.Create();
-        clock.Tick();
+        var result = clock.Tick();
         var currentClock = clock.Current();
         Assert.Equal(1, currentClock.Time);
+        Assert.Equal(result.Time, currentClock.Time);
     }
 }

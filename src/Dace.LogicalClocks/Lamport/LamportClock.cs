@@ -11,21 +11,20 @@ public sealed partial class LamportClock :
 {
     private long _time = 0L;
 
-    private LamportClock() { }
-
     /// <summary>
-    /// Creates a new instance of the <see cref="LamportClock"/> class.
+    /// Gets the default singleton instance of the Lamport clock.
     /// </summary>
-    /// <returns>A new instance of <see cref="LamportClock"/>.</returns>
-    static internal LamportClock Create()
-        => new LamportClock();
+    public static LamportClock Default
+        => LamportClockInstance.LamportClock;
+
+    private LamportClock() { }
 
     /// <summary>
     /// Gets the current timestamp of the Lamport clock.
     /// </summary>
     /// <returns>The current <see cref="LamportClockTimestamp"/>.</returns>
     public LamportClockTimestamp Current()
-        => new(_time);
+        => new LamportClockTimestamp(_time);
 
     /// <summary>
     /// Updates the Lamport clock by witnessing a received timestamp from another Lamport clock.
@@ -33,8 +32,7 @@ public sealed partial class LamportClock :
     /// the logical clock ordering constraints.
     /// </summary>
     /// <param name="receiveClock">The received <see cref="LamportClockTimestamp"/>.</param>
-
-    public void Witness(
+    public LamportClockTimestamp Witness(
         LamportClockTimestamp receiveClock)
     {
         var currentTime = 0L;
@@ -44,32 +42,31 @@ public sealed partial class LamportClock :
             currentTime = Interlocked.Read(ref _time);
             if (receiveClock.Time < currentTime)
             {
-                Interlocked.Increment(ref _time);
-                return;
+                return Tick();
             }
         }
         while (Interlocked.CompareExchange(ref _time, Math.Max(currentTime, receiveClock.Time) + 1, currentTime) != currentTime);
+
+        return Current();
     }
 
     /// <summary>
     /// Advances the Lamport clock by one tick.
     /// </summary>
-    public void Tick()
-        => Interlocked.Increment(ref _time);
-
-    /// <inheritdoc/>
-    ILogicalClockTimestamp ILogicalClock.Current()
-        => Current();
-
-    /// <inheritdoc/>
-    void ILogicalClock.Witness(
-        ILogicalClockTimestamp received)
-        => Witness((LamportClockTimestamp)received);
+    public LamportClockTimestamp Tick()
+    {
+        var newTime = Interlocked.Increment(ref _time);
+        return new(newTime);
+    }
 
     /// <summary>
-    /// Gets the default singleton instance of the Lamport clock.
+    /// Creates a new instance of the <see cref="LamportClock"/> class.
     /// </summary>
-    public static LamportClock Default => LamportClockInstance.LamportClock;
+    /// <returns>A new instance of <see cref="LamportClock"/>.</returns>
+    static internal LamportClock Create()
+    {
+        return new LamportClock();
+    }
 
     /// <summary>
     /// Holds the default singleton instance of the <see cref="LamportClock"/>.
