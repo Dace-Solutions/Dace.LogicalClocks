@@ -10,7 +10,6 @@ public readonly struct LamportClockTimestamp(long time)
     : ILogicalClockTimestamp,
     IComparable<LamportClockTimestamp>,
     IComparable,
-    IEqualityComparer<LamportClockTimestamp>,
     IEquatable<LamportClockTimestamp>
 
 {
@@ -18,21 +17,6 @@ public readonly struct LamportClockTimestamp(long time)
     /// Gets the logical time represented by this timestamp.
     /// </summary>
     public long Time => time;
-
-    /// <inheritdoc />
-    public bool Equals(
-        LamportClockTimestamp x,
-        LamportClockTimestamp y)
-    {
-        return x.Time == y.Time;
-    }
-
-    /// <inheritdoc />
-    public int GetHashCode(
-        [DisallowNull] LamportClockTimestamp obj)
-    {
-        return obj.Time.GetHashCode();
-    }
 
     /// <inheritdoc />
     public bool Equals(
@@ -57,39 +41,21 @@ public readonly struct LamportClockTimestamp(long time)
     {
         return other is LamportClockTimestamp lamportClockTimestamp
             ? CompareTo(lamportClockTimestamp)
-            : 1;
-    }
-
-    /// <inheritdoc />
-    bool IEqualityComparer<ILogicalClockTimestamp>.Equals(
-        ILogicalClockTimestamp? x,
-        ILogicalClockTimestamp? y)
-    {
-        return x is LamportClockTimestamp lamportClockTimestamp1 && y is LamportClockTimestamp lamportClockTimestamp2
-            && Equals(lamportClockTimestamp1, lamportClockTimestamp2);
-    }
-
-    /// <inheritdoc />
-    int IEqualityComparer<ILogicalClockTimestamp>.GetHashCode(
-        ILogicalClockTimestamp obj)
-    {
-        return obj is LamportClockTimestamp lamportClockTimestamp
-            ? lamportClockTimestamp.GetHashCode()
-            : 1;
+            : throw new ArgumentException($"The provided clock is not a {nameof(LamportClockTimestamp)}.", nameof(other));
     }
 
     /// <inheritdoc />
     bool IEquatable<ILogicalClockTimestamp>.Equals(
         ILogicalClockTimestamp? other)
     {
-        return other is LamportClockTimestamp lamportClockTimestamp 
+        return other is LamportClockTimestamp lamportClockTimestamp
             && Equals(lamportClockTimestamp);
     }
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return obj is LamportClock lamportClockTimestamp
+        return obj is LamportClockTimestamp lamportClockTimestamp
             && Equals(lamportClockTimestamp);
     }
 
@@ -116,7 +82,7 @@ public readonly struct LamportClockTimestamp(long time)
     /// Determines whether two <see cref="LamportClockTimestamp"/> instances are not equal.
     /// </summary>
     public static bool operator !=(
-        LamportClockTimestamp? left, 
+        LamportClockTimestamp? left,
         LamportClockTimestamp? right)
         => !(left == right);
 
@@ -124,7 +90,7 @@ public readonly struct LamportClockTimestamp(long time)
     /// Determines whether two <see cref="LamportClockTimestamp"/> instances are equal.
     /// </summary>
     public static bool operator ==(
-        LamportClockTimestamp? left, 
+        LamportClockTimestamp? left,
         LamportClockTimestamp? right)
     {
         if (left is null || right is null)
@@ -136,23 +102,23 @@ public readonly struct LamportClockTimestamp(long time)
     /// Determines whether one <see cref="LamportClockTimestamp"/> instance is greater than another.
     /// </summary>
     public static bool operator >(LamportClockTimestamp left, LamportClockTimestamp right)
-        => left.Time > right.Time;
+        => left.CompareTo(right) > 0;
 
     /// <summary>
     /// Determines whether one <see cref="LamportClockTimestamp"/> instance is less than another.
     /// </summary>
     public static bool operator <(LamportClockTimestamp left, LamportClockTimestamp right)
-        => left.Time < right.Time;
+        => left.CompareTo(right) < 0;
 
     /// <summary>
     /// Determines whether one <see cref="LamportClockTimestamp"/> instance is greater than or equal to another.
     /// </summary>
     public static bool operator >=(LamportClockTimestamp left, LamportClockTimestamp right)
-        => left.Time >= right.Time;
+        => left.CompareTo(right) >= 0;
 
     /// <summary>
     /// Determines whether one <see cref="LamportClockTimestamp"/> instance is less than or equal to another.
     /// </summary>
     public static bool operator <=(LamportClockTimestamp left, LamportClockTimestamp right)
-        => left.Time <= right.Time;
+        => left.CompareTo(right) <= 0;
 }

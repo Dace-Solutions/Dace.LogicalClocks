@@ -5,7 +5,7 @@ public partial class LamportClock
     ValueTask<LamportClockTimestamp> ILogicalClock<LamportClockTimestamp>.TickAsync(
         CancellationToken cancellationToken)
     {
-        var value = Current();
+        var value = Tick();
         return ValueTask.FromResult(value);
     }
 
@@ -47,7 +47,11 @@ public partial class LamportClock
         ILogicalClockTimestamp received,
         CancellationToken cancellationToken)
     {
-        ILogicalClockTimestamp value = Witness((LamportClockTimestamp)received);
-        return ValueTask.FromResult(value);
+        if (received is LamportClockTimestamp timestamp)
+        {
+            ILogicalClockTimestamp value = Witness(timestamp);
+            return ValueTask.FromResult(value);
+        }
+        throw new ArgumentException($"The provided clock is not a {nameof(LamportClockTimestamp)}.", nameof(received));
     }
 }
