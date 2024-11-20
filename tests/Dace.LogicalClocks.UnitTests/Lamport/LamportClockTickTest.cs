@@ -1,6 +1,7 @@
 namespace Dace.LogicalClocks.UnitTests.Lamport;
 
 using Dace.LogicalClocks.Lamport;
+using Moq;
 
 public class LamportClockTickTest
 {
@@ -19,7 +20,7 @@ public class LamportClockTickTest
     }
 
     [Fact]
-    public void Equals_ShouldReturnTrueForEqualClocks()
+    public void ObjectEquals_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
         var time = DateTime.Now.Ticks;
@@ -27,28 +28,150 @@ public class LamportClockTickTest
         var clock2 = new LamportClockTimestamp(time);
 
         // Assert
-        Assert.True(clock1.Equals(clock1, clock2));
+        Assert.True(clock1.Equals((object)clock2));
     }
 
     [Fact]
-    public void GetHashCode_ShouldReturnSameHashCodeForEqualClocks()
+    public void Equals_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
         var time = DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
-        Assert.Equal(clock1.GetHashCode(clock1), clock2.GetHashCode(clock2));
+
+        // Assert
+        Assert.True(clock1.Equals(clock2));
     }
 
     [Fact]
-    public void CompareTo_ShouldReturnZeroForEqualClocks()
+    public void EqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
         var time = DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
+
+        // Assert
+        Assert.True(clock1 == clock2);
+    }
+
+    [Fact]
+    public void NotEqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time);
+        var clock2 = new LamportClockTimestamp(time + 1);
+
+        // Assert
+        Assert.True(clock1 != clock2);
+    }
+
+    [Fact]
+    public void GreaterThanOperator_ShouldReturnTrueForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time + 1);
+        var clock2 = new LamportClockTimestamp(time);
+
+        // Assert
+        Assert.True(clock1 > clock2);
+    }
+
+    [Fact]
+    public void GreaterThanOrEqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time + 1);
+        var clock2 = new LamportClockTimestamp(time);
+
+        // Assert
+        Assert.True(clock1 >= clock2);
+    }
+
+    [Fact]
+    public void LessThanOperator_ShouldReturnTrueForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time);
+        var clock2 = new LamportClockTimestamp(time + 1);
+
+        // Assert
+        Assert.True(clock1 < clock2);
+    }
+
+    [Fact]
+    public void LessThanOrEqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time);
+        var clock2 = new LamportClockTimestamp(time + 1);
+
+        // Assert
+        Assert.True(clock1 <= clock2);
+    }
+
+    [Fact]
+    public void GetHashCode_ShouldReturnSameHashCodeForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time);
+        var clock2 = new LamportClockTimestamp(time);
+        Assert.Equal(clock1.GetHashCode(), clock2.GetHashCode());
+    }
+
+    [Fact]
+    public void CompareTo_ShouldReturnZeroForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        var clock1 = new LamportClockTimestamp(time);
+        var clock2 = new LamportClockTimestamp(time);
+        var clock3 = new LamportClockTimestamp(time - 1);
+        var clock4 = new LamportClockTimestamp(time + 1);
 
         // Assert
         Assert.Equal(0, clock1.CompareTo(clock2));
+        Assert.True(clock1.CompareTo(clock3) > 0);
+        Assert.True(clock1.CompareTo(clock4) < 0);
+    }
+
+    [Fact]
+    public void CompareTo_LogicalClockTimestamp_ShouldReturnZeroForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        IComparable<ILogicalClockTimestamp> clock1 = new LamportClockTimestamp(time);
+        ILogicalClockTimestamp clock2 = new LamportClockTimestamp(time);
+        ILogicalClockTimestamp clock3 = new LamportClockTimestamp(time - 1);
+        ILogicalClockTimestamp clock4 = new LamportClockTimestamp(time + 1);
+        var mock = new Mock<ILogicalClockTimestamp>();
+
+        // Assert
+        Assert.Equal(0, clock1.CompareTo(clock2));
+        Assert.True(clock1.CompareTo(clock3) > 0);
+        Assert.True(clock1.CompareTo(clock4) < 0);
+        Assert.Throws<ArgumentException>(() => clock1.CompareTo(mock.Object));
+    }
+    [Fact]
+    public void CompareTo_IComparable_ShouldReturnZeroForEqualClockTimestamps()
+    {
+        // Arrange
+        var time = DateTime.Now.Ticks;
+        IComparable clock1 = new LamportClockTimestamp(time);
+        var clock2 = new LamportClockTimestamp(time);
+        var clock3 = new LamportClockTimestamp(time - 1);
+        var clock4 = new LamportClockTimestamp(time + 1);
+
+        // Assert
+        Assert.Equal(0, clock1.CompareTo(clock2));
+        Assert.True(clock1.CompareTo(clock3) > 0);
+        Assert.True(clock1.CompareTo(clock4) < 0);
+        Assert.Throws<ArgumentException>(() => clock1.CompareTo(new object()));
     }
 }

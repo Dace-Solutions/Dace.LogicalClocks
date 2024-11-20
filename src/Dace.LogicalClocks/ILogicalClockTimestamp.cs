@@ -6,7 +6,6 @@ namespace Dace.LogicalClocks;
 public interface ILogicalClockTimestamp :
     IComparable<ILogicalClockTimestamp>,
     IComparable,
-    IEqualityComparer<ILogicalClockTimestamp>,
     IEquatable<ILogicalClockTimestamp>
 {
 }
