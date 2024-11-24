@@ -17,7 +17,8 @@ public class LogicalClockConfigurator
     public void UseLamportClock()
     {
         _services
-            .AddSingleton(s => LamportClock.Default)
+            .AddSingleton(s => LamportClock.Default);
+        _services
             .AddTransient<ILogicalClock>(s => s.GetRequiredService<LamportClock>());
     }
 }
