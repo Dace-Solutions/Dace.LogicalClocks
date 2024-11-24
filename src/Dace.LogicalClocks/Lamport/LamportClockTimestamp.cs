@@ -94,7 +94,7 @@ public readonly struct LamportClockTimestamp(long time)
         LamportClockTimestamp? right)
     {
         if (left is null || right is null)
-            return false;
+            return left is null && right is null;
         return left.Equals(right);
     }
 
