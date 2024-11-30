@@ -1,8 +1,9 @@
 using Dace.LogicalClocks.Configurations;
+using Dace.LogicalClocks.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Dace.LogicalClocks.Extensions;
-
 
 public static class ServiceCollectionExtensions
 {
@@ -10,6 +11,9 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         Action<LogicalClockConfigurator> action)
     {
+        services
+            .TryAddTransient<IWallClock, SystemWallClock>();
+
         var configurator = new LogicalClockConfigurator(services);
         action(configurator);
         return services;
