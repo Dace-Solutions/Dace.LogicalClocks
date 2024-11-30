@@ -6,8 +6,8 @@ using Dace.LogicalClocks;
 /// Represents a Lamport logical clock, a type of logical clock used to determine the order of events
 /// in distributed systems.
 /// </summary>
-public sealed partial class LamportClock :
-    ILogicalClock<LamportClockTimestamp>
+public sealed class LamportClock :
+    LogicalClock<LamportClockTimestamp>
 {
     private long _time = 0L;
 
@@ -23,7 +23,7 @@ public sealed partial class LamportClock :
     /// Gets the current timestamp of the Lamport clock.
     /// </summary>
     /// <returns>The current <see cref="LamportClockTimestamp"/>.</returns>
-    public LamportClockTimestamp Current()
+    public override LamportClockTimestamp Current()
         => new LamportClockTimestamp(_time);
 
     /// <summary>
@@ -32,7 +32,7 @@ public sealed partial class LamportClock :
     /// the logical clock ordering constraints.
     /// </summary>
     /// <param name="receiveClock">The received <see cref="LamportClockTimestamp"/>.</param>
-    public LamportClockTimestamp Witness(
+    public override LamportClockTimestamp Witness(
         LamportClockTimestamp receiveClock)
     {
         var currentTime = 0L;
@@ -53,7 +53,7 @@ public sealed partial class LamportClock :
     /// <summary>
     /// Advances the Lamport clock by one tick.
     /// </summary>
-    public LamportClockTimestamp Tick()
+    public override LamportClockTimestamp Tick()
     {
         var newTime = Interlocked.Increment(ref _time);
         return new(newTime);
