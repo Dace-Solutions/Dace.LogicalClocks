@@ -9,7 +9,7 @@ using Dace.LogicalClocks;
 public sealed partial class LamportClock :
     ILogicalClock<LamportClockTimestamp>
 {
-    private long _time = 0L;
+    private ulong _time = 0L;
 
     /// <summary>
     /// Gets the default singleton instance of the Lamport clock.
@@ -35,11 +35,11 @@ public sealed partial class LamportClock :
     public LamportClockTimestamp Witness(
         LamportClockTimestamp receiveClock)
     {
-        var currentTime = 0L;
+        var currentTime = 0UL;
 
         do
         {
-            currentTime = Interlocked.Read(ref _time);
+            currentTime = Interlocked.CompareExchange(ref _time, 0UL, 0UL);
             if (receiveClock.Time < currentTime)
             {
                 return Tick();
