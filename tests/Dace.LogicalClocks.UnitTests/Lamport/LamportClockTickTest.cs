@@ -9,7 +9,7 @@ public class LamportClockTickTest
     public void ClockProperty_ShouldReturnCorrectValue()
     {
         // Arrange
-        var expectedClockValue = 12345L;
+        var expectedClockValue = 12345UL;
         var stu = new LamportClockTimestamp(expectedClockValue);
 
         // Act
@@ -23,7 +23,7 @@ public class LamportClockTickTest
     public void ObjectEquals_ShouldOnlyReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
 
@@ -36,7 +36,7 @@ public class LamportClockTickTest
     public void Equals_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
 
@@ -48,7 +48,7 @@ public class LamportClockTickTest
     public void EqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
         LamportClockTimestamp? clock3 = null;
@@ -66,7 +66,7 @@ public class LamportClockTickTest
     public void NotEqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time + 1);
 
@@ -78,7 +78,7 @@ public class LamportClockTickTest
     public void GreaterThanOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time + 1);
         var clock2 = new LamportClockTimestamp(time);
 
@@ -90,7 +90,7 @@ public class LamportClockTickTest
     public void GreaterThanOrEqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time + 1);
         var clock2 = new LamportClockTimestamp(time);
 
@@ -102,7 +102,7 @@ public class LamportClockTickTest
     public void LessThanOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time + 1);
 
@@ -114,7 +114,7 @@ public class LamportClockTickTest
     public void LessThanOrEqualsOperator_ShouldReturnTrueForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time + 1);
 
@@ -126,7 +126,7 @@ public class LamportClockTickTest
     public void GetHashCode_ShouldReturnSameHashCodeForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
         Assert.Equal(clock1.GetHashCode(), clock2.GetHashCode());
@@ -136,7 +136,7 @@ public class LamportClockTickTest
     public void CompareTo_ShouldReturnZeroForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         var clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
         var clock3 = new LamportClockTimestamp(time - 1);
@@ -152,7 +152,7 @@ public class LamportClockTickTest
     public void CompareTo_LogicalClockTimestamp_ShouldReturnZeroForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         IComparable<ILogicalClockTimestamp> clock1 = new LamportClockTimestamp(time);
         ILogicalClockTimestamp clock2 = new LamportClockTimestamp(time);
         ILogicalClockTimestamp clock3 = new LamportClockTimestamp(time - 1);
@@ -170,7 +170,7 @@ public class LamportClockTickTest
     public void Equals_LogicalClockTimestamp_ShouldReturnZeroForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         IEquatable<ILogicalClockTimestamp> clock1 = new LamportClockTimestamp(time);
         ILogicalClockTimestamp clock2 = new LamportClockTimestamp(time);
         ILogicalClockTimestamp clock3 = new LamportClockTimestamp(time - 1);
@@ -187,7 +187,7 @@ public class LamportClockTickTest
     public void CompareTo_IComparable_ShouldReturnZeroForEqualClockTimestamps()
     {
         // Arrange
-        var time = DateTime.Now.Ticks;
+        var time = (ulong)DateTime.Now.Ticks;
         IComparable clock1 = new LamportClockTimestamp(time);
         var clock2 = new LamportClockTimestamp(time);
         var clock3 = new LamportClockTimestamp(time - 1);

@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 /// Represents a timestamp for a Lamport logical clock, encapsulating the logical time.
 /// </summary>
 /// <param name="time">The logical time represented by the timestamp.</param>
-public readonly struct LamportClockTimestamp(long time)
+public readonly struct LamportClockTimestamp(ulong time)
     : ILogicalClockTimestamp,
     IComparable<LamportClockTimestamp>,
     IComparable,
@@ -16,7 +16,7 @@ public readonly struct LamportClockTimestamp(long time)
     /// <summary>
     /// Gets the logical time represented by this timestamp.
     /// </summary>
-    public long Time => time;
+    public ulong Time => time;
 
     /// <inheritdoc />
     public bool Equals(
