@@ -11,6 +11,7 @@ public interface ILogicalClock<T> : ILogicalClock
     /// <inheritdoc />
     new ValueTask<T> TickAsync(
         CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Updates the logical clock based on a received tick from another logical clock of type <typeparamref name="T"/>.
     /// </summary>
