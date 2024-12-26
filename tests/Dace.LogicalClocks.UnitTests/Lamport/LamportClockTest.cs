@@ -59,11 +59,11 @@ public class LamportClockTest
     public void Witness_ShouldNotUpdateClock_WhenTheClockIsLessThanCurrent()
     {
         var clock = LamportClock.Create();
-        clock.Tick();//Current:1
-        clock.Tick();//Current:2
-        clock.Tick();//Current:3
-        clock.Tick();//Current:4
-        clock.Tick();//Current:5
+        clock.Now();//Current:1
+        clock.Now();//Current:2
+        clock.Now();//Current:3
+        clock.Now();//Current:4
+        clock.Now();//Current:5
 
         var receivedClock = new LamportClockTimestamp(3);
         var result = clock.Witness(receivedClock);
@@ -111,7 +111,7 @@ public class LamportClockTest
     public void Tick_ShouldIncrementClock()
     {
         var clock = LamportClock.Create();
-        var result = clock.Tick();
+        var result = clock.Now();
         var currentClock = clock.Current();
         Assert.Equal(1UL, currentClock.Time);
         Assert.Equal(result.Time, currentClock.Time);
@@ -121,7 +121,7 @@ public class LamportClockTest
     public async Task TickAsync_LamportClockTimestamp_ShouldIncrementClock()
     {
         ILogicalClock<LamportClockTimestamp> clock = LamportClock.Create();
-        var result = await clock.TickAsync();
+        var result = await clock.NowAsync();
         var currentClock = await clock.CurrentAsync();
         Assert.Equal(1UL, currentClock.Time);
         Assert.Equal(result.Time, currentClock.Time);
@@ -131,7 +131,7 @@ public class LamportClockTest
     public async Task TickAsync_ShouldIncrementClock()
     {
         ILogicalClock clock = LamportClock.Create();
-        var result = (LamportClockTimestamp)await clock.TickAsync();
+        var result = (LamportClockTimestamp)await clock.NowAsync();
         var currentClock = (LamportClockTimestamp)await clock.CurrentAsync();
         Assert.Equal(1UL, currentClock.Time);
         Assert.Equal(result.Time, currentClock.Time);

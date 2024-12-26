@@ -1,9 +1,8 @@
 namespace Dace.LogicalClocks.HybridLogical;
 public class HybridLogicalClockSettings
 {
-    public TimeSpan MaxOffset { get; set; }
-    public TimeSpan ToleratedOffset { get; set; }
+    public TimeSpan MaxBackwardJump { get; set; }
+    public TimeSpan MaxForwardJump { get; set; }
     public bool ForwardClockJumpCheckEnabled { get; set; } = false;
-    public bool IsMonitoringForwardClockJumps { get; set; } = false;
-    public long WallTimeUpperBound { get; set; } = 0;
+    public WallClockTimestamp WallTimeUpperBound { get; set; } = WallClockTimestamp.Zero;
 }

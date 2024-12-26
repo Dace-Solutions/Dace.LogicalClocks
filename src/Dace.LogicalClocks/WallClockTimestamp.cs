@@ -7,29 +7,35 @@ public readonly struct WallClockTimestamp : IComparable<WallClockTimestamp>,
     IComparable,
     IEquatable<WallClockTimestamp>
 {
-    public static WallClockTimestamp Zero { get; } = new WallClockTimestamp(DateTime.MinValue);
+    public static WallClockTimestamp Zero { get; } = new(DateTime.MinValue);
+
+    public double UnixEpoch { get; }
+
     public WallClockTimestamp(DateTime dateTime)
+        : this((dateTime - DateTime.UnixEpoch).TotalNanoseconds)
     {
-        Time = dateTime;
     }
 
-    public DateTime Time { get; }
+    public WallClockTimestamp(double unixEpoch)
+    {
+        UnixEpoch = unixEpoch;
+    }
 
     public int CompareTo(
         WallClockTimestamp other)
     {
-        return Time.CompareTo(other.Time);
+        return UnixEpoch.CompareTo(other.UnixEpoch);
     }
 
     public override int GetHashCode()
     {
-        return Time.GetHashCode();
+        return UnixEpoch.GetHashCode();
     }
 
     public bool Equals(
         WallClockTimestamp other)
     {
-        return Time == other.Time;
+        return UnixEpoch == other.UnixEpoch;
     }
 
     public override bool Equals(
@@ -45,6 +51,11 @@ public readonly struct WallClockTimestamp : IComparable<WallClockTimestamp>,
         return other is WallClockTimestamp wallClock
             ? CompareTo(wallClock)
             : throw new ArgumentException($"The provided value is not a {nameof(WallClockTimestamp)}.", nameof(other));
+    }
+
+    public override string ToString()
+    {
+        return $"UnixEpoch: {UnixEpoch}";
     }
 
     public static bool operator ==(WallClockTimestamp left, WallClockTimestamp right)

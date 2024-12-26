@@ -1,4 +1,4 @@
-﻿namespace Dace.LogicalClocks;
+namespace Dace.LogicalClocks;
 
 public abstract class LogicalClock<T> : ILogicalClock<T>
     where T : ILogicalClockTimestamp
@@ -7,12 +7,6 @@ public abstract class LogicalClock<T> : ILogicalClock<T>
     {
         
     }
-
-    /// <summary>
-    /// Gets the current timestamp of the clock.
-    /// </summary>
-    /// <returns>The current <see cref="T"/>.</returns>
-    public abstract T Current();
 
     /// <summary>
     /// Updates the clock by witnessing a received timestamp from another clock.
@@ -26,21 +20,13 @@ public abstract class LogicalClock<T> : ILogicalClock<T>
     /// <summary>
     /// Advances the clock by one tick.
     /// </summary>
-    public abstract T Tick();
+    public abstract T Now();
 
     /// <inheritdoc/>
-    ValueTask<T> ILogicalClock<T>.TickAsync(
+    ValueTask<T> ILogicalClock<T>.NowAsync(
         CancellationToken cancellationToken)
     {
-        var value = Tick();
-        return ValueTask.FromResult(value);
-    }
-
-    /// <inheritdoc/>
-    ValueTask<T> ILogicalClock<T>.CurrentAsync(
-        CancellationToken cancellationToken)
-    {
-        var value = Current();
+        var value = Now();
         return ValueTask.FromResult(value);
     }
 
@@ -54,18 +40,10 @@ public abstract class LogicalClock<T> : ILogicalClock<T>
     }
 
     /// <inheritdoc/>
-    ValueTask<ILogicalClockTimestamp> ILogicalClock.TickAsync(
+    ValueTask<ILogicalClockTimestamp> ILogicalClock.NowAsync(
         CancellationToken cancellationToken)
     {
-        ILogicalClockTimestamp value = Tick();
-        return ValueTask.FromResult(value);
-    }
-
-    /// <inheritdoc/>
-    ValueTask<ILogicalClockTimestamp> ILogicalClock.CurrentAsync(
-        CancellationToken cancellationToken)
-    {
-        ILogicalClockTimestamp value = Current();
+        ILogicalClockTimestamp value = Now();
         return ValueTask.FromResult(value);
     }
 

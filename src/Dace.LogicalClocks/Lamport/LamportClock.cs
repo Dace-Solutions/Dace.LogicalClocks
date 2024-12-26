@@ -20,13 +20,6 @@ public sealed class LamportClock :
     private LamportClock() { }
 
     /// <summary>
-    /// Gets the current timestamp of the Lamport clock.
-    /// </summary>
-    /// <returns>The current <see cref="LamportClockTimestamp"/>.</returns>
-    public override LamportClockTimestamp Current()
-        => new LamportClockTimestamp(_time);
-
-    /// <summary>
     /// Updates the Lamport clock by witnessing a received timestamp from another Lamport clock.
     /// This ensures that the clock accounts for the received timestamp while maintaining
     /// the logical clock ordering constraints.
@@ -42,18 +35,18 @@ public sealed class LamportClock :
             currentTime = Interlocked.CompareExchange(ref _time, 0UL, 0UL);
             if (receiveClock.Time < currentTime)
             {
-                return Tick();
+                return Now();
             }
         }
         while (Interlocked.CompareExchange(ref _time, Math.Max(currentTime, receiveClock.Time) + 1, currentTime) != currentTime);
 
-        return Current();
+        return new(_time);
     }
 
     /// <summary>
     /// Advances the Lamport clock by one tick.
     /// </summary>
-    public override LamportClockTimestamp Tick()
+    public override LamportClockTimestamp Now()
     {
         var newTime = Interlocked.Increment(ref _time);
         return new(newTime);

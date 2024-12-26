@@ -1,15 +1,15 @@
 namespace Dace.LogicalClocks.HybridLogical;
 
-public readonly struct HybridLogicalClockTimestamp(long wallTime, int logicalTime)
+public readonly struct HybridLogicalClockTimestamp(WallClockTimestamp wallTime, int logicalTime)
     : ILogicalClockTimestamp,
     IComparable<HybridLogicalClockTimestamp>,
     IComparable,
     IEquatable<HybridLogicalClockTimestamp>
 {
     /// <summary>
-    /// Represents the physical time in unix millisecond.
+    /// Represents the physical time in Unix Epoch.
     /// </summary>
-    public long WallTime => wallTime;
+    public WallClockTimestamp WallTime => wallTime;
     /// <summary>
     /// Represents the logical time.
     /// </summary>

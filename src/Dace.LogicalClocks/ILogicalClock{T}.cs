@@ -9,7 +9,7 @@ public interface ILogicalClock<T> : ILogicalClock
     where T : ILogicalClockTimestamp
 {
     /// <inheritdoc />
-    new ValueTask<T> TickAsync(
+    new ValueTask<T> NowAsync(
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -20,9 +20,5 @@ public interface ILogicalClock<T> : ILogicalClock
     /// <returns>A <see cref="ValueTask" /> that represents the asynchronous save operation. The <see cref="ValueTask" /> result contains the current logical clock timestamp.</returns>
     ValueTask<T> WitnessAsync(
         T received,
-        CancellationToken cancellationToken = default);
-
-    /// <inheritdoc />
-    new ValueTask<T> CurrentAsync(
         CancellationToken cancellationToken = default);
 }

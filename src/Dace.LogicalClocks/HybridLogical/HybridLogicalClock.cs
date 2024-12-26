@@ -1,5 +1,6 @@
 namespace Dace.LogicalClocks.HybridLogical;
 
+using Dace.LogicalClocks.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,11 +11,11 @@ public sealed partial class HybridLogicalClock :
     private readonly ILogger<HybridLogicalClock>? _logger;
     private readonly IWallClock _wallClock;
     private readonly HybridLogicalClockSettings _settings;
-    private long _lastPhysicalTime;
+    private WallClockTimestamp _lastPhysicalTime = WallClockTimestamp.Zero;
     private int _logicalTime;
     private int _monotonicityErrorsCount = 0;
 
-    private HybridLogicalClock(
+    internal HybridLogicalClock(
         IWallClock wallClock,
         IOptions<HybridLogicalClockSettings> options,
         ILogger<HybridLogicalClock>? logger)
@@ -25,13 +26,6 @@ public sealed partial class HybridLogicalClock :
     }
 
     /// <summary>
-    /// Gets the current timestamp of the Hybrid Logical clock.
-    /// </summary>
-    /// <returns>The current <see cref="HybridLogicalClockTimestamp"/>.</returns>
-    public override HybridLogicalClockTimestamp Current()
-        => new HybridLogicalClockTimestamp(_lastPhysicalTime, _logicalTime);
-
-    /// <summary>
     /// Updates the Hybrid Logical clock by witnessing a received timestamp from another Hybrid Logical clock.
     /// This ensures that the clock accounts for the received timestamp while maintaining
     /// the logical clock ordering constraints.
@@ -40,12 +34,14 @@ public sealed partial class HybridLogicalClock :
     public override HybridLogicalClockTimestamp Witness(
         HybridLogicalClockTimestamp receiveClock)
     {
-        if (receiveClock.WallTime < Interlocked.Read(ref _lastPhysicalTime))
-            return Current();
+        var lastPhysicalTime = GetLastPhysicalClock();
+        if (receiveClock.WallTime < lastPhysicalTime)
+            return Now();
 
         lock (_lock)
         {
-            if (receiveClock.WallTime > _lastPhysicalTime)
+            lastPhysicalTime = GetLastPhysicalClock();
+            if (receiveClock.WallTime > lastPhysicalTime)
             {
                 _lastPhysicalTime = receiveClock.WallTime;
                 _logicalTime = receiveClock.LogicalTime + 1;
@@ -65,13 +61,13 @@ public sealed partial class HybridLogicalClock :
     /// <summary>
     /// Advances the Hybrid Logical clock by one tick.
     /// </summary>
-    public override HybridLogicalClockTimestamp Tick()
+    public override HybridLogicalClockTimestamp Now()
     {
         var physicalClock = GetPhysicalClockAndCheck();
 
         lock (_lock)
         {
-            if (_lastPhysicalTime> physicalClock)
+            if (_lastPhysicalTime >= physicalClock)
             {
                 _logicalTime++;
             }
@@ -86,68 +82,66 @@ public sealed partial class HybridLogicalClock :
         }
     }
 
-    private long GetPhysicalClockAndCheck()
+    private WallClockTimestamp GetPhysicalClockAndCheck()
     {
-        var oldTime = Interlocked.Read(ref _lastPhysicalTime);
+        var oldTime = GetLastPhysicalClock();
         var newTime = GetWallClockTime();
+        var lastPhysicalTime = oldTime;
 
-        while (true)
+        do
         {
-            var lastPhysTime = Interlocked.Read(ref _lastPhysicalTime);
-            if (Interlocked.CompareExchange(ref _lastPhysicalTime, newTime, lastPhysTime) == lastPhysTime)
+            if (Interlocked.CompareExchange(ref _lastPhysicalTime, newTime, lastPhysicalTime) == lastPhysicalTime)
                 break;
 
-            if (lastPhysTime >= newTime)
+            lastPhysicalTime = GetLastPhysicalClock();
+            if (lastPhysicalTime >= newTime)
                 break;
+        } while (true);
+
+
+        if (oldTime != WallClockTimestamp.Zero)
+        {
+            var interval = oldTime.UnixEpoch - newTime.UnixEpoch;
+            if (interval > _settings.MaxBackwardJump.TotalNanoseconds)
+            {
+                Interlocked.Increment(ref _monotonicityErrorsCount);
+                _logger?.LogWarning(
+                    "Detected forward time jump of {NanoSeconds} nano seconds is not allowed with tolerance of {MaxForwardJump} nano seconds",
+                    interval,
+                    _settings.MaxBackwardJump);
+            }
+            else if (_settings.ForwardClockJumpCheckEnabled && _settings.MaxForwardJump.TotalNanoseconds <= -interval)
+            {
+                _logger?.LogCritical(
+                    "Detected forward time jump of {NanoSeconds} nano seconds is not allowed with tolerance of {MaxForwardJump} nano seconds",
+                    -interval,
+                    _settings.MaxForwardJump.TotalNanoseconds);
+            }
         }
 
-        CheckPhysicalClock(oldTime, newTime);
         return newTime;
     }
 
-    private long GetWallClockTime()
+    private WallClockTimestamp GetLastPhysicalClock()
     {
-        return new DateTimeOffset(_wallClock.Now().Time).ToUnixTimeMilliseconds();
+        return Interlocked.CompareExchange(ref _lastPhysicalTime, WallClockTimestamp.Zero, WallClockTimestamp.Zero);
     }
 
-    private void CheckPhysicalClock(long oldTime, long newTime)
+    private WallClockTimestamp GetWallClockTime()
     {
-        if (oldTime == 0)
-            return;
-
-        var interval = oldTime - newTime;
-        if (interval > _settings.MaxOffset.Ticks / 10)
-        {
-            Interlocked.Increment(ref _monotonicityErrorsCount);
-            _logger?.LogWarning("Backward time jump detected ({TotalSeconds} seconds)", TimeSpan.FromTicks(-interval).TotalSeconds);
-        }
-
-        if (_settings.ForwardClockJumpCheckEnabled)
-        {
-            var toleratedForwardClockJump = ToleratedForwardClockJump();
-            if (toleratedForwardClockJump.Ticks <= -interval)
-            {
-                _logger?.LogCritical(
-                    "Detected forward time jump of {TotalSeconds} seconds is not allowed with tolerance of {ToleratedForwardClockJump} seconds",
-                    TimeSpan.FromMilliseconds(-interval).TotalSeconds,
-                    toleratedForwardClockJump.TotalSeconds);
-            }
-        }
+        return _wallClock.Now();
     }
 
     private void EnforceWallTimeWithinBoundLocked()
     {
-        if (_settings.WallTimeUpperBound != 0 && _lastPhysicalTime > _settings.WallTimeUpperBound)
+        var wallClockTimestamp = GetLastPhysicalClock();
+        if (_settings.WallTimeUpperBound != WallClockTimestamp.Zero
+            && wallClockTimestamp > _settings.WallTimeUpperBound)
         {
             _logger?.LogCritical(
-                "Wall time {PhysicalTime} is not allowed to be greater than upper bound of {WallTimeUpperBound}",
-                _lastPhysicalTime,
+                "Wall time {WallTime} is not allowed to be greater than upper bound of {WallTimeUpperBound}",
+                wallClockTimestamp,
                 _settings.WallTimeUpperBound);
         }
-    }
-
-    private TimeSpan ToleratedForwardClockJump()
-    {
-        return _settings.MaxOffset / 2;
     }
 }
