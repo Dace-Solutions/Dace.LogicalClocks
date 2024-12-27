@@ -3,22 +3,17 @@ namespace Dace.LogicalClocks;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-public readonly struct WallClockTimestamp : IComparable<WallClockTimestamp>,
+public readonly struct WallClockTimestamp(double unixEpoch) : IComparable<WallClockTimestamp>,
     IComparable,
     IEquatable<WallClockTimestamp>
 {
     public static WallClockTimestamp Zero { get; } = new(DateTime.MinValue);
 
-    public double UnixEpoch { get; }
+    public double UnixEpoch { get; } = unixEpoch;
 
     public WallClockTimestamp(DateTime dateTime)
         : this((dateTime - DateTime.UnixEpoch).TotalNanoseconds)
     {
-    }
-
-    public WallClockTimestamp(double unixEpoch)
-    {
-        UnixEpoch = unixEpoch;
     }
 
     public int CompareTo(

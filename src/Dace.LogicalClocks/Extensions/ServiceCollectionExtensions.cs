@@ -11,9 +11,6 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         Action<LogicalClockConfigurator> action)
     {
-        services
-            .TryAddTransient<IWallClock, SystemWallClock>();
-
         var configurator = new LogicalClockConfigurator(services);
         action(configurator);
         return services;

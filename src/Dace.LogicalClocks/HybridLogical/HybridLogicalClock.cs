@@ -1,6 +1,6 @@
 namespace Dace.LogicalClocks.HybridLogical;
 
-using Dace.LogicalClocks.Internal;
+using Dace.LogicalClocks.HybridLogical.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -34,26 +34,20 @@ public sealed partial class HybridLogicalClock :
     public override HybridLogicalClockTimestamp Witness(
         HybridLogicalClockTimestamp receiveClock)
     {
-        var lastPhysicalTime = GetLastPhysicalClock();
-        if (receiveClock.WallTime < lastPhysicalTime)
+        if (receiveClock.WallTime < GetLastPhysicalClock())
             return Now();
 
         lock (_lock)
         {
-            lastPhysicalTime = GetLastPhysicalClock();
-            if (receiveClock.WallTime > lastPhysicalTime)
+            if (receiveClock.WallTime > _lastPhysicalTime)
             {
                 _lastPhysicalTime = receiveClock.WallTime;
                 _logicalTime = receiveClock.LogicalTime + 1;
             }
             else if (receiveClock.WallTime == _lastPhysicalTime)
             {
-                if (receiveClock.LogicalTime > _logicalTime)
-                {
-                    _logicalTime = Math.Max(receiveClock.LogicalTime, _logicalTime) + 1;
-                }
+                _logicalTime = Math.Max(receiveClock.LogicalTime, _logicalTime) + 1;
             }
-            EnforceWallTimeWithinBoundLocked();
             return new HybridLogicalClockTimestamp(_lastPhysicalTime, _logicalTime);
         }
     }
@@ -77,7 +71,6 @@ public sealed partial class HybridLogicalClock :
                 _logicalTime = 0;
             }
 
-            EnforceWallTimeWithinBoundLocked();
             return new HybridLogicalClockTimestamp(_lastPhysicalTime, _logicalTime);
         }
     }
@@ -106,7 +99,7 @@ public sealed partial class HybridLogicalClock :
             {
                 Interlocked.Increment(ref _monotonicityErrorsCount);
                 _logger?.LogWarning(
-                    "Detected forward time jump of {NanoSeconds} nano seconds is not allowed with tolerance of {MaxForwardJump} nano seconds",
+                    "Detected backward time jump of {NanoSeconds} nano seconds is not allowed with tolerance of {newTime} nano seconds",
                     interval,
                     _settings.MaxBackwardJump);
             }
@@ -130,18 +123,5 @@ public sealed partial class HybridLogicalClock :
     private WallClockTimestamp GetWallClockTime()
     {
         return _wallClock.Now();
-    }
-
-    private void EnforceWallTimeWithinBoundLocked()
-    {
-        var wallClockTimestamp = GetLastPhysicalClock();
-        if (_settings.WallTimeUpperBound != WallClockTimestamp.Zero
-            && wallClockTimestamp > _settings.WallTimeUpperBound)
-        {
-            _logger?.LogCritical(
-                "Wall time {WallTime} is not allowed to be greater than upper bound of {WallTimeUpperBound}",
-                wallClockTimestamp,
-                _settings.WallTimeUpperBound);
-        }
     }
 }
