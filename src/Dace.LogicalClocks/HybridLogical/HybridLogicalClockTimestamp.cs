@@ -66,8 +66,8 @@ public readonly struct HybridLogicalClockTimestamp(WallClockTimestamp wallTime, 
     /// </returns>
     public int CompareTo(HybridLogicalClockTimestamp other)
     {
-        return WallTime == other.WallTime 
-            ? LogicalTime.CompareTo(other.LogicalTime) 
+        return WallTime == other.WallTime
+            ? LogicalTime.CompareTo(other.LogicalTime)
             : WallTime.CompareTo(other.WallTime);
     }
 

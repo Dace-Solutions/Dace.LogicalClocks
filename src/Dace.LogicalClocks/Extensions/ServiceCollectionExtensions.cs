@@ -1,7 +1,5 @@
 using Dace.LogicalClocks.Configurations;
-using Dace.LogicalClocks.Internal;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Dace.LogicalClocks.Extensions;
 

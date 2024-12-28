@@ -22,8 +22,8 @@ public class LogicalClockConfigurator
         _services
             .TryAddSingleton<IWallClock, SystemWallClock>();
 
-       _options = _services
-            .AddOptions<WallClockSettings>();
+        _options = _services
+             .AddOptions<WallClockSettings>();
     }
 
     public LogicalClockConfigurator ConfigureWallClock(

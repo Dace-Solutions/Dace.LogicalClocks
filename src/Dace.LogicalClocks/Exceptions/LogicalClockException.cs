@@ -5,7 +5,7 @@ using System;
 public class LogicalClockException : Exception
 {
     protected LogicalClockException(
-        string message) 
+        string message)
         : base(message)
     {
     }

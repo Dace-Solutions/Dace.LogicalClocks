@@ -5,7 +5,7 @@ public abstract class LogicalClock<T> : ILogicalClock<T>
 {
     protected LogicalClock()
     {
-        
+
     }
 
     /// <summary>
