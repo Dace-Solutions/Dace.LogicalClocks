@@ -103,7 +103,7 @@ public sealed partial class HybridLogicalClock :
                     interval,
                     _settings.MaxBackwardJump);
             }
-            else if (_settings.ForwardClockJumpCheckEnabled && _settings.MaxForwardJump.TotalNanoseconds <= -interval)
+            else if (_settings.MaxForwardJump.TotalNanoseconds <= -interval)
             {
                 _logger?.LogCritical(
                     "Detected forward time jump of {NanoSeconds} nano seconds is not allowed with tolerance of {MaxForwardJump} nano seconds",

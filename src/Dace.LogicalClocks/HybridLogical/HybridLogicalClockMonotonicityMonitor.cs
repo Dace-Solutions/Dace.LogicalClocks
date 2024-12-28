@@ -1,7 +1,9 @@
 namespace Dace.LogicalClocks.HybridLogical;
 
+using Dace.LogicalClocks.Extensions;
 using Dace.LogicalClocks.HybridLogical.Configurations;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Timers;
 
@@ -9,15 +11,18 @@ internal class HybridLogicalClockMonotonicityMonitor : IHostedService, IDisposab
 {
     private readonly Timer _timer;
     private readonly HybridLogicalClock _hybridLogicalClock;
-    private readonly IOptions<HybridLogicalClockSettings> _options;
+    private readonly IOptions<HybridLogicalClockMonotonicityMonitorSettings> _options;
+    private readonly ILogger<HybridLogicalClockMonotonicityMonitor>? _logger;
+    private bool _disposed = false;
 
     public HybridLogicalClockMonotonicityMonitor(
         HybridLogicalClock hybridLogicalClock,
-        IOptions<HybridLogicalClockSettings> options)
+        IOptions<HybridLogicalClockMonotonicityMonitorSettings> options,
+        ILogger<HybridLogicalClockMonotonicityMonitor>? logger)
     {
-        _options = options;
         _hybridLogicalClock = hybridLogicalClock;
-
+        _options = options;
+        _logger = logger;
         _timer = new();
         _timer.Elapsed += (_, _) => Monitor();
         _timer.AutoReset = false;
@@ -27,11 +32,12 @@ internal class HybridLogicalClockMonotonicityMonitor : IHostedService, IDisposab
     {
         try
         {
-            if (_options.Value.ForwardClockJumpCheckEnabled)
-            {
-                _hybridLogicalClock.Now();
-            }
+            _hybridLogicalClock.Now();
             SetTimerInterval();
+        }
+        catch(Exception ex)
+        {
+            _logger?.ExceptionInMonotonicityMonitor(ex);
         }
         finally
         {
@@ -48,7 +54,7 @@ internal class HybridLogicalClockMonotonicityMonitor : IHostedService, IDisposab
 
     private void SetTimerInterval()
     {
-        _timer.Interval = _options.Value.MaxForwardJump.TotalMilliseconds / 10;
+        _timer.Interval = _options.Value.Interval.TotalMilliseconds;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -59,6 +65,10 @@ internal class HybridLogicalClockMonotonicityMonitor : IHostedService, IDisposab
 
     public void Dispose()
     {
-        _timer?.Dispose();
+        if (_disposed) 
+            return;
+
+        _timer.Dispose();
+        _disposed = true;
     }
 }
