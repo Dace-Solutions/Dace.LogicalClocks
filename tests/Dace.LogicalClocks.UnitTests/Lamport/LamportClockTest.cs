@@ -9,8 +9,8 @@ public class LamportClockTest
     public void Default_ShouldInitializeClock()
     {
         var clock = LamportClock.Default;
-        var currentClock = clock.Current();
-        Assert.Equal(0UL, currentClock.Time);
+        var currentClock = clock.Now();
+        Assert.Equal(1UL, currentClock.Time);
     }
 
     [Fact]
@@ -21,27 +21,27 @@ public class LamportClockTest
     }
 
     [Fact]
-    public void Current_ShouldReturnClockTick()
+    public void Current_ShouldReturnClockNow()
     {
         var clock = LamportClock.Create();
-        var currentClock = clock.Current();
-        Assert.Equal(0UL, currentClock.Time);
+        var currentClock = clock.Now();
+        Assert.Equal(1UL, currentClock.Time);
     }
 
     [Fact]
-    public async Task CurrentAsync_LamportClockTimestamp_ShouldReturnClockTick()
+    public async Task CurrentAsync_LamportClockTimestamp_ShouldReturnClockNow()
     {
         ILogicalClock<LamportClockTimestamp> clock = LamportClock.Create();
-        var currentClock = await clock.CurrentAsync();
-        Assert.Equal(0UL, currentClock.Time);
+        var currentClock = await clock.NowAsync();
+        Assert.Equal(1UL, currentClock.Time);
     }
 
     [Fact]
-    public async Task CurrentAsync_ShouldReturnClockTick()
+    public async Task CurrentAsync_ShouldReturnClockNow()
     {
         ILogicalClock clock = LamportClock.Create();
-        var currentClock = (LamportClockTimestamp)await clock.CurrentAsync();
-        Assert.Equal(0UL, currentClock.Time);
+        var currentClock = (LamportClockTimestamp)await clock.NowAsync();
+        Assert.Equal(1UL, currentClock.Time);
     }
 
     [Fact]
@@ -50,27 +50,22 @@ public class LamportClockTest
         var clock = LamportClock.Create();
         var receivedClock = new LamportClockTimestamp(5);
         var result = clock.Witness(receivedClock);
-        var currentClock = clock.Current();
-        Assert.Equal(6UL, currentClock.Time);
-        Assert.Equal(result.Time, currentClock.Time);
+        Assert.Equal(6UL, result.Time);
     }
 
     [Fact]
     public void Witness_ShouldNotUpdateClock_WhenTheClockIsLessThanCurrent()
     {
         var clock = LamportClock.Create();
-        clock.Tick();//Current:1
-        clock.Tick();//Current:2
-        clock.Tick();//Current:3
-        clock.Tick();//Current:4
-        clock.Tick();//Current:5
+        clock.Now();//Current:1
+        clock.Now();//Current:2
+        clock.Now();//Current:3
+        clock.Now();//Current:4
+        clock.Now();//Current:5
 
         var receivedClock = new LamportClockTimestamp(3);
         var result = clock.Witness(receivedClock);
-        var currentClock = clock.Current();
-        Assert.Equal(6UL, currentClock.Time);
-
-        Assert.Equal(result.Time, currentClock.Time);
+        Assert.Equal(6UL, result.Time);
     }
 
     [Fact]
@@ -79,9 +74,7 @@ public class LamportClockTest
         ILogicalClock<LamportClockTimestamp> clock = LamportClock.Create();
         var receivedClock = new LamportClockTimestamp(5);
         var result = await clock.WitnessAsync(receivedClock);
-        var currentClock = await clock.CurrentAsync();
-        Assert.Equal(6UL, currentClock.Time);
-        Assert.Equal(result.Time, currentClock.Time);
+        Assert.Equal(6UL, result.Time);
     }
 
     [Fact]
@@ -92,10 +85,8 @@ public class LamportClockTest
         var receivedClockMock = new Mock<ILogicalClockTimestamp>();
 
         var result = (LamportClockTimestamp)await clock.WitnessAsync(receivedClock);
-        var currentClock = (LamportClockTimestamp)await clock.CurrentAsync();
 
-        Assert.Equal(6UL, currentClock.Time);
-        Assert.Equal(result.Time, currentClock.Time);
+        Assert.Equal(6UL, result.Time);
     }
 
     [Fact]
@@ -108,32 +99,26 @@ public class LamportClockTest
     }
 
     [Fact]
-    public void Tick_ShouldIncrementClock()
+    public void Now_ShouldIncrementClock()
     {
         var clock = LamportClock.Create();
-        var result = clock.Tick();
-        var currentClock = clock.Current();
-        Assert.Equal(1UL, currentClock.Time);
-        Assert.Equal(result.Time, currentClock.Time);
+        var result = clock.Now();
+        Assert.Equal(1UL, result.Time);
     }
 
     [Fact]
-    public async Task TickAsync_LamportClockTimestamp_ShouldIncrementClock()
+    public async Task NowAsync_LamportClockTimestamp_ShouldIncrementClock()
     {
         ILogicalClock<LamportClockTimestamp> clock = LamportClock.Create();
-        var result = await clock.TickAsync();
-        var currentClock = await clock.CurrentAsync();
-        Assert.Equal(1UL, currentClock.Time);
-        Assert.Equal(result.Time, currentClock.Time);
+        var result = await clock.NowAsync();
+        Assert.Equal(1UL, result.Time);
     }
 
     [Fact]
-    public async Task TickAsync_ShouldIncrementClock()
+    public async Task NowAsync_ShouldIncrementClock()
     {
         ILogicalClock clock = LamportClock.Create();
-        var result = (LamportClockTimestamp)await clock.TickAsync();
-        var currentClock = (LamportClockTimestamp)await clock.CurrentAsync();
-        Assert.Equal(1UL, currentClock.Time);
-        Assert.Equal(result.Time, currentClock.Time);
+        var result = (LamportClockTimestamp)await clock.NowAsync();
+        Assert.Equal(1UL, result.Time);
     }
 }

@@ -20,20 +20,7 @@ public class LamportClockTickTest
     }
 
     [Fact]
-    public void ObjectEquals_ShouldOnlyReturnTrueForEqualClockTimestamps()
-    {
-        // Arrange
-        var time = (ulong)DateTime.Now.Ticks;
-        var clock1 = new LamportClockTimestamp(time);
-        var clock2 = new LamportClockTimestamp(time);
-
-        // Assert
-        Assert.True(clock1.Equals((object)clock2));
-        Assert.False(clock1.Equals(new object()));
-    }
-
-    [Fact]
-    public void Equals_ShouldReturnTrueForEqualClockTimestamps()
+    public void Equals_ShouldOnlyReturnTrueForEqualClockTimestamps()
     {
         // Arrange
         var time = (ulong)DateTime.Now.Ticks;
@@ -42,6 +29,8 @@ public class LamportClockTickTest
 
         // Assert
         Assert.True(clock1.Equals(clock2));
+        Assert.True(clock1.Equals((object)clock2));
+        Assert.False(clock1.Equals(new object()));
     }
 
     [Fact]

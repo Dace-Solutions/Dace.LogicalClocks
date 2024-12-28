@@ -1,7 +1,4 @@
 namespace Dace.LogicalClocks.Lamport;
-
-using System.Diagnostics.CodeAnalysis;
-
 /// <summary>
 /// Represents a timestamp for a Lamport logical clock, encapsulating the logical time.
 /// </summary>
