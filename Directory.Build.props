@@ -21,10 +21,9 @@
 
   <PropertyGroup Label="AssemblyInfo">
     <ProductVersion>0.9.0</ProductVersion>
-    <Company>Riverty</Company>
     <Product>Dace</Product>
     <Description>Distributed Adaptive Consistency Engine</Description>
-    <Copyright>© $(Company) $([System.DateTime]::Now.ToString('yyyy'))</Copyright>
+    <Copyright>© $(Product) $([System.DateTime]::Now.ToString('yyyy'))</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
