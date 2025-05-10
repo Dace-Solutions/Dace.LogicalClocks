@@ -6,8 +6,8 @@ using Dace.LogicalClocks;
 /// Represents a Lamport logical clock, a type of logical clock used to determine the order of events
 /// in distributed systems.
 /// </summary>
-public sealed partial class LamportClock :
-    ILogicalClock<LamportClockTimestamp>
+public sealed class LamportClock :
+    LogicalClock<LamportClockTimestamp>
 {
     private ulong _time = 0L;
 
@@ -20,19 +20,12 @@ public sealed partial class LamportClock :
     private LamportClock() { }
 
     /// <summary>
-    /// Gets the current timestamp of the Lamport clock.
-    /// </summary>
-    /// <returns>The current <see cref="LamportClockTimestamp"/>.</returns>
-    public LamportClockTimestamp Current()
-        => new LamportClockTimestamp(_time);
-
-    /// <summary>
     /// Updates the Lamport clock by witnessing a received timestamp from another Lamport clock.
     /// This ensures that the clock accounts for the received timestamp while maintaining
     /// the logical clock ordering constraints.
     /// </summary>
     /// <param name="receiveClock">The received <see cref="LamportClockTimestamp"/>.</param>
-    public LamportClockTimestamp Witness(
+    public override LamportClockTimestamp Witness(
         LamportClockTimestamp receiveClock)
     {
         var currentTime = 0UL;
@@ -42,18 +35,18 @@ public sealed partial class LamportClock :
             currentTime = Interlocked.CompareExchange(ref _time, 0UL, 0UL);
             if (receiveClock.Time < currentTime)
             {
-                return Tick();
+                return Now();
             }
         }
         while (Interlocked.CompareExchange(ref _time, Math.Max(currentTime, receiveClock.Time) + 1, currentTime) != currentTime);
 
-        return Current();
+        return new(_time);
     }
 
     /// <summary>
     /// Advances the Lamport clock by one tick.
     /// </summary>
-    public LamportClockTimestamp Tick()
+    public override LamportClockTimestamp Now()
     {
         var newTime = Interlocked.Increment(ref _time);
         return new(newTime);

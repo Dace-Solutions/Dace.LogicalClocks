@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dace.LogicalClocks.Extensions;
 
-
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddLogicalClock(
